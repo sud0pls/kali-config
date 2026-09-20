@@ -1,0 +1,7 @@
+# Cheatsheet de comandos AD / recon inicial de pentest interno
+# Formato: descripcion corta | comando (con placeholders xxxx)
+# Para agregar mas comandos, sumar una linea nueva con el mismo formato.
+NetExec LDAP - Enumerar cuentas de maquina (MAQ) | nxc ldap xxxx -u xxxx -p xxxx -M maq
+NetExec SMB - Password policy del dominio | nxc smb xxxx -u xxxx -p xxxx --pass-pol
+NetExec SMB - Dump de SAM local | nxc smb xxxx -u xxxx -p xxxx --sam
+Certipy - Buscar plantillas ADCS vulnerables | certipy-ad find -u xxxx -p xxxx -dc-ip xxxx -ns xxxx -vulnerable
