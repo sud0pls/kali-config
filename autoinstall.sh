@@ -114,7 +114,7 @@ fi
 
 for opt in share_history inc_append_history hist_reduce_blanks hist_find_no_dups; do
     if ! grep -qE "^setopt $opt" "$ZSHRC" 2>/dev/null; then
-        sed -i "/^setopt hist_verify/a setopt $opt" "$ZSHRC"
+        echo "setopt $opt" >> "$ZSHRC"
         log "setopt $opt agregado"
     fi
 done
