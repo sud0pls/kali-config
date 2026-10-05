@@ -44,6 +44,20 @@ if command -v tmux >/dev/null 2>&1; then
     fi
 fi
 
+NERD_FONT_DIR="$HOME/.local/share/fonts/hack-nerd"
+if fc-list : family | grep -qi "hack nerd"; then
+    log "Hack Nerd Font ya esta instalada"
+else
+    log "Instalando Hack Nerd Font..."
+    command -v curl >/dev/null 2>&1 || { $SUDO apt-get install -y -qq curl; }
+    mkdir -p "$NERD_FONT_DIR"
+    curl -fsSL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Hack.tar.xz \
+        | tar -xJ -C "$NERD_FONT_DIR"
+    fc-cache -f "$NERD_FONT_DIR"
+    log "Hack Nerd Font instalada en $NERD_FONT_DIR"
+    warn "Configura 'Hack Nerd Font Mono' como fuente de tu emulador de terminal"
+fi
+
 if [ -e "$HOME/.tmux.conf" ] || [ -L "$HOME/.tmux.conf" ]; then
     if [ "$(readlink -f "$HOME/.tmux.conf" 2>/dev/null || true)" != "$(readlink -f "$TMUX_CONF_SRC")" ]; then
         log "Respaldando ~/.tmux.conf existente -> ~/.tmux.conf.backup.$TIMESTAMP"
