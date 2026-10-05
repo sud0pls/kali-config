@@ -23,22 +23,24 @@ else
 fi
 
 NEED_INSTALL=()
-command -v tmux >/dev/null 2>&1 || NEED_INSTALL+=("tmux")
-command -v fzf  >/dev/null 2>&1 || NEED_INSTALL+=("fzf")
+command -v tmux  >/dev/null 2>&1 || NEED_INSTALL+=("tmux")
+command -v fzf   >/dev/null 2>&1 || NEED_INSTALL+=("fzf")
+command -v xclip >/dev/null 2>&1 || NEED_INSTALL+=("xclip")
 
 if [ "${#NEED_INSTALL[@]}" -gt 0 ]; then
     log "Instalando paquetes faltantes: ${NEED_INSTALL[*]}"
-    $SUDO apt-get update
-    $SUDO apt-get install -y "${NEED_INSTALL[@]}"
+    $SUDO apt-get update -qq
+    $SUDO apt-get install -y -qq "${NEED_INSTALL[@]}"
 else
-    log "tmux y fzf ya estan instalados"
+    log "tmux, fzf y xclip ya estan instalados"
 fi
 
 if command -v tmux >/dev/null 2>&1; then
-    TMUX_VER_RAW="$(tmux -V | grep -oE '[0-9]+\.[0-9]+' | head -1)"
-    TMUX_MAJOR="${TMUX_VER_RAW%%.*}"
-    if [ -n "$TMUX_MAJOR" ] && [ "$TMUX_MAJOR" -lt 3 ]; then
-        warn "tmux $TMUX_VER_RAW detectado. Se recomienda >= 3.2"
+    TMUX_VER="$(tmux -V | grep -oE '[0-9]+\.[0-9]+' | head -1)"
+    TMUX_MAJOR="${TMUX_VER%%.*}"
+    TMUX_MINOR="${TMUX_VER#*.}"
+    if [ -n "$TMUX_MAJOR" ] && { [ "$TMUX_MAJOR" -lt 3 ] || { [ "$TMUX_MAJOR" -eq 3 ] && [ "$TMUX_MINOR" -lt 2 ]; }; }; then
+        warn "tmux $TMUX_VER detectado. Se requiere >= 3.2 (display-popup)"
     fi
 fi
 
@@ -72,10 +74,7 @@ for candidate in \
     /usr/share/zsh/vendor-completions/fzf-key-bindings.zsh \
     /usr/local/opt/fzf/shell/key-bindings.zsh
 do
-    if [ -f "$candidate" ]; then
-        FZF_KEYBINDINGS="$candidate"
-        break
-    fi
+    [ -f "$candidate" ] && { FZF_KEYBINDINGS="$candidate"; break; }
 done
 
 FZF_COMPLETION=""
@@ -84,10 +83,7 @@ for candidate in \
     /usr/share/fzf/completion.zsh \
     /usr/local/opt/fzf/shell/completion.zsh
 do
-    if [ -f "$candidate" ]; then
-        FZF_COMPLETION="$candidate"
-        break
-    fi
+    [ -f "$candidate" ] && { FZF_COMPLETION="$candidate"; break; }
 done
 
 if [ -n "$FZF_KEYBINDINGS" ]; then
@@ -107,9 +103,11 @@ else
 fi
 
 if grep -qE '^HISTSIZE=' "$ZSHRC" 2>/dev/null; then
-    sed -i 's/^HISTSIZE=.*/HISTSIZE=100000/' "$ZSHRC"
-    sed -i 's/^SAVEHIST=.*/SAVEHIST=100000/' "$ZSHRC"
+    sed -i -e 's/^HISTSIZE=.*/HISTSIZE=100000/' -e 's/^SAVEHIST=.*/SAVEHIST=100000/' "$ZSHRC"
     log "HISTSIZE/SAVEHIST actualizados a 100000"
+else
+    { echo ""; echo "HISTSIZE=100000"; echo "SAVEHIST=100000"; } >> "$ZSHRC"
+    log "HISTSIZE/SAVEHIST agregados (100000)"
 fi
 
 for opt in share_history inc_append_history hist_reduce_blanks hist_find_no_dups; do
@@ -120,8 +118,7 @@ for opt in share_history inc_append_history hist_reduce_blanks hist_find_no_dups
 done
 
 if grep -qE "^bindkey '\\^\\[\\[5~'" "$ZSHRC" 2>/dev/null; then
-    sed -i "s/^bindkey '\\^\\[\\[5~'/# bindkey '^[[5~'/" "$ZSHRC"
-    sed -i "s/^bindkey '\\^\\[\\[6~'/# bindkey '^[[6~'/" "$ZSHRC"
+    sed -i -e "s/^bindkey '\\^\\[\\[5~'/# bindkey '^[[5~'/" -e "s/^bindkey '\\^\\[\\[6~'/# bindkey '^[[6~'/" "$ZSHRC"
     log "Page up/down desactivados (scroll via tmux)"
 fi
 
