@@ -65,18 +65,24 @@ else
 fi
 
 QTERM_INI="$HOME/.config/qterminal.org/qterminal.ini"
-if [ -f "$QTERM_INI" ]; then
-    if ! grep -q '^fontFamily=Hack Nerd Font Mono$' "$QTERM_INI"; then
-        cp "$QTERM_INI" "$QTERM_INI.backup.$TIMESTAMP"
-        if grep -q '^fontFamily=' "$QTERM_INI"; then
-            sed -i 's/^fontFamily=.*/fontFamily=Hack Nerd Font Mono/' "$QTERM_INI"
-        else
-            sed -i '/^\[General\]/a fontFamily=Hack Nerd Font Mono' "$QTERM_INI"
-        fi
-        log "qterminal: fuente cambiada a Hack Nerd Font Mono (reinicia qterminal)"
+if [ ! -f "$QTERM_INI" ]; then
+    mkdir -p "$(dirname "$QTERM_INI")"
+    printf '[General]\nfontFamily=Hack Nerd Font Mono\n' > "$QTERM_INI"
+    log "qterminal: configurado con Hack Nerd Font Mono"
+elif ! grep -q '^fontFamily=Hack Nerd Font Mono$' "$QTERM_INI"; then
+    cp "$QTERM_INI" "$QTERM_INI.backup.$TIMESTAMP"
+    if grep -q '^fontFamily=' "$QTERM_INI"; then
+        sed -i 's/^fontFamily=.*/fontFamily=Hack Nerd Font Mono/' "$QTERM_INI"
+    elif grep -q '^\[General\]' "$QTERM_INI"; then
+        sed -i '/^\[General\]/a fontFamily=Hack Nerd Font Mono' "$QTERM_INI"
+    else
+        printf '[General]\nfontFamily=Hack Nerd Font Mono\n' >> "$QTERM_INI"
     fi
-else
-    warn "Configura 'Hack Nerd Font Mono' como fuente de tu terminal"
+    log "qterminal: fuente cambiada a Hack Nerd Font Mono"
+    if pgrep -x qterminal >/dev/null 2>&1; then
+        warn "qterminal esta abierto: cerralo y abrilo. Si la barra se ve rota, elegi"
+        warn "'Hack Nerd Font Mono' en qterminal > Preferencias > Apariencia > Fuente"
+    fi
 fi
 
 if [ -e "$HOME/.tmux.conf" ] || [ -L "$HOME/.tmux.conf" ]; then
