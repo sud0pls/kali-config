@@ -34,8 +34,13 @@ row "prefix + ,"        "Renombrar tab"
 
 section "Busqueda y scroll"
 row "Ctrl + r"          "Buscar en historial de comandos (fzf)"
-row "Scroll up / Alt+Up"  "Modo scroll (vi): h j k l, v seleccionar,"
-row ""                  "y copiar, q/Esc salir"
+row "Scroll up / Alt+Up"  "Modo scroll (vi): h j k l, q/Esc salir"
+
+section "Copiar / pegar"
+row "v  /  arrastrar mouse" "Seleccionar (no copia nada todavia)"
+row "y  o  Enter"           "Copiar al portapapeles (llega a Windows)"
+row "prefix + p"            "Pegar el portapapeles"
+row "Shift + arrastrar"     "Seleccion nativa de qterminal (Ctrl+Shift+C)"
 
 section "Ayuda"
 row "Alt + h / prefix+h" "Esta ventana de ayuda"

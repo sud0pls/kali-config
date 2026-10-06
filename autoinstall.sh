@@ -23,16 +23,24 @@ else
 fi
 
 NEED_INSTALL=()
-command -v tmux  >/dev/null 2>&1 || NEED_INSTALL+=("tmux")
-command -v fzf   >/dev/null 2>&1 || NEED_INSTALL+=("fzf")
-command -v xclip >/dev/null 2>&1 || NEED_INSTALL+=("xclip")
+command -v tmux     >/dev/null 2>&1 || NEED_INSTALL+=("tmux")
+command -v fzf      >/dev/null 2>&1 || NEED_INSTALL+=("fzf")
+command -v xsel     >/dev/null 2>&1 || NEED_INSTALL+=("xsel")
+command -v curl     >/dev/null 2>&1 || NEED_INSTALL+=("curl")
+command -v xz       >/dev/null 2>&1 || NEED_INSTALL+=("xz-utils")
+command -v fc-cache >/dev/null 2>&1 || NEED_INSTALL+=("fontconfig")
+
+if [ "$(systemd-detect-virt 2>/dev/null || true)" = "vmware" ] \
+    && ! dpkg -s open-vm-tools-desktop >/dev/null 2>&1; then
+    NEED_INSTALL+=("open-vm-tools-desktop")
+fi
 
 if [ "${#NEED_INSTALL[@]}" -gt 0 ]; then
     log "Instalando paquetes faltantes: ${NEED_INSTALL[*]}"
     $SUDO apt-get update -qq
     $SUDO apt-get install -y -qq "${NEED_INSTALL[@]}"
 else
-    log "tmux, fzf y xclip ya estan instalados"
+    log "Dependencias ya instaladas"
 fi
 
 if command -v tmux >/dev/null 2>&1; then
@@ -45,17 +53,30 @@ if command -v tmux >/dev/null 2>&1; then
 fi
 
 NERD_FONT_DIR="$HOME/.local/share/fonts/hack-nerd"
-if fc-list : family | grep -qi "hack nerd"; then
+if fc-list : family 2>/dev/null | grep -i "hack nerd font mono" >/dev/null; then
     log "Hack Nerd Font ya esta instalada"
 else
     log "Instalando Hack Nerd Font..."
-    command -v curl >/dev/null 2>&1 || { $SUDO apt-get install -y -qq curl; }
     mkdir -p "$NERD_FONT_DIR"
     curl -fsSL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Hack.tar.xz \
         | tar -xJ -C "$NERD_FONT_DIR"
     fc-cache -f "$NERD_FONT_DIR"
     log "Hack Nerd Font instalada en $NERD_FONT_DIR"
-    warn "Configura 'Hack Nerd Font Mono' como fuente de tu emulador de terminal"
+fi
+
+QTERM_INI="$HOME/.config/qterminal.org/qterminal.ini"
+if [ -f "$QTERM_INI" ]; then
+    if ! grep -q '^fontFamily=Hack Nerd Font Mono$' "$QTERM_INI"; then
+        cp "$QTERM_INI" "$QTERM_INI.backup.$TIMESTAMP"
+        if grep -q '^fontFamily=' "$QTERM_INI"; then
+            sed -i 's/^fontFamily=.*/fontFamily=Hack Nerd Font Mono/' "$QTERM_INI"
+        else
+            sed -i '/^\[General\]/a fontFamily=Hack Nerd Font Mono' "$QTERM_INI"
+        fi
+        log "qterminal: fuente cambiada a Hack Nerd Font Mono (reinicia qterminal)"
+    fi
+else
+    warn "Configura 'Hack Nerd Font Mono' como fuente de tu terminal"
 fi
 
 if [ -e "$HOME/.tmux.conf" ] || [ -L "$HOME/.tmux.conf" ]; then
