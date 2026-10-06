@@ -37,10 +37,9 @@ row "Ctrl + r"          "Buscar en historial de comandos (fzf)"
 row "Scroll up / Alt+Up"  "Modo scroll (vi): h j k l, q/Esc salir"
 
 section "Copiar / pegar"
-row "v  /  arrastrar mouse" "Seleccionar (no copia nada todavia)"
-row "y  o  Enter"           "Copiar al portapapeles (llega a Windows)"
-row "prefix + p"            "Pegar el portapapeles"
-row "Shift + arrastrar"     "Seleccion nativa de qterminal (Ctrl+Shift+C)"
+row "Arrastrar mouse"       "Selecciona y deja el texto en el portapapeles"
+row "v  + mover,  y/Enter"  "Seleccionar y copiar con teclado"
+row "Ctrl+Shift+V / prefix+p" "Pegar (tambien en Windows)"
 
 section "Ayuda"
 row "Alt + h / prefix+h" "Esta ventana de ayuda"
