@@ -30,6 +30,17 @@ command -v curl     >/dev/null 2>&1 || NEED_INSTALL+=("curl")
 command -v xz       >/dev/null 2>&1 || NEED_INSTALL+=("xz-utils")
 command -v fc-cache >/dev/null 2>&1 || NEED_INSTALL+=("fontconfig")
 
+# Escritorio XFCE (Kali): barra, rofi (Win+D) y wallpaper -> desktop/setup-xfce.sh
+IS_XFCE=0
+case "${XDG_CURRENT_DESKTOP:-}" in *XFCE*) IS_XFCE=1 ;; esac
+pgrep -u "$(id -u)" -x xfce4-session >/dev/null 2>&1 && IS_XFCE=1
+if [ "$IS_XFCE" -eq 1 ]; then
+    for pkg in rofi xfce4-panel-profiles xfce4-genmon-plugin xfce4-cpugraph-plugin \
+               xfce4-whiskermenu-plugin xfce4-pulseaudio-plugin libnotify-bin x11-xserver-utils; do
+        dpkg -s "$pkg" >/dev/null 2>&1 || NEED_INSTALL+=("$pkg")
+    done
+fi
+
 if [ "$(systemd-detect-virt 2>/dev/null || true)" = "vmware" ] \
     && ! dpkg -s open-vm-tools-desktop >/dev/null 2>&1; then
     NEED_INSTALL+=("open-vm-tools-desktop")
@@ -176,6 +187,14 @@ for addon in "$SCRIPT_DIR"/zsh/*.zsh; do
         log "Addon de zsh ya estaba agregado: $(basename "$addon")"
     fi
 done
+
+if [ "$IS_XFCE" -eq 1 ]; then
+    log "Personalizando XFCE (barra, rofi en Win+D, wallpaper)..."
+    bash "$SCRIPT_DIR/desktop/setup-xfce.sh"
+else
+    warn "No se detecto una sesion XFCE: se omite barra/rofi/wallpaper"
+    warn "  (desde el escritorio podes correr: bash $SCRIPT_DIR/desktop/setup-xfce.sh)"
+fi
 
 if command -v tmux >/dev/null 2>&1 && tmux info >/dev/null 2>&1; then
     tmux source-file "$HOME/.tmux.conf" && log "Config de tmux recargada en la sesion activa"

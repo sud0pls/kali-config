@@ -1,0 +1,150 @@
+/* Tema de rofi: panel con el wallpaper a la izquierda, lista a la derecha.
+   Mismos colores que la barra de XFCE y la de tmux (#00afff = colour39). */
+
+* {
+    font:             "Hack Nerd Font 11";
+    bg:               #11131a;
+    bg-alt:           #1b1f2a;
+    bg-glass:         #0b0f14cc;
+    fg:               #c8d3f5;
+    fg-dim:           #6c7086;
+    accent:           #00afff;
+    dark:             #0b0f14;
+
+    background-color: transparent;
+    text-color:       @fg;
+}
+
+window {
+    location:         center;
+    anchor:           center;
+    width:            920px;
+    border:           2px solid;
+    border-color:     @accent;
+    border-radius:    16px;
+    background-color: @bg;
+}
+
+mainbox {
+    orientation:      horizontal;
+    spacing:          0;
+    children:         [ imagebox, listbox ];
+}
+
+/* --- Izquierda: imagen + buscador ------------------------------------------ */
+imagebox {
+    expand:           false;
+    width:            328px;
+    padding:          18px;
+    spacing:          0;
+    orientation:      vertical;
+    background-image: url("~/.config/pen-tmux/rofi/side.png", height);
+    children:         [ dummy, inputbar ];
+}
+
+dummy {
+    expand:           true;
+}
+
+inputbar {
+    padding:          12px 14px;
+    spacing:          10px;
+    border-radius:    12px;
+    border:           1px solid;
+    border-color:     #00afff66;
+    background-color: @bg-glass;
+    children:         [ prompt, entry ];
+}
+
+prompt {
+    text-color:       @accent;
+}
+
+entry {
+    placeholder:       "Buscar...";
+    placeholder-color: @fg-dim;
+    cursor:            text;
+}
+
+/* --- Derecha: modos + resultados ------------------------------------------- */
+listbox {
+    padding:          18px;
+    spacing:          14px;
+    orientation:      vertical;
+    children:         [ mode-switcher, listview ];
+}
+
+mode-switcher {
+    spacing:          8px;
+}
+
+button {
+    padding:          8px;
+    border-radius:    10px;
+    background-color: @bg-alt;
+    text-color:       @fg-dim;
+    cursor:           pointer;
+}
+
+button selected {
+    background-color: @accent;
+    text-color:       @dark;
+}
+
+listview {
+    columns:          1;
+    lines:            8;
+    spacing:          6px;
+    dynamic:          false;
+    scrollbar:        false;
+    fixed-height:     true;
+    cursor:           default;
+}
+
+element {
+    padding:          8px 12px;
+    spacing:          12px;
+    border-radius:    10px;
+    cursor:           pointer;
+}
+
+element normal.normal,
+element alternate.normal {
+    background-color: transparent;
+    text-color:       @fg;
+}
+
+element normal.active,
+element alternate.active {
+    text-color:       @accent;
+}
+
+element selected.normal,
+element selected.active {
+    background-color: @accent;
+    text-color:       @dark;
+}
+
+element-icon {
+    size:             26px;
+    background-color: transparent;
+    text-color:       inherit;
+    cursor:           inherit;
+}
+
+element-text {
+    vertical-align:   0.5;
+    background-color: transparent;
+    text-color:       inherit;
+    cursor:           inherit;
+}
+
+message {
+    padding:          10px;
+    border-radius:    10px;
+    background-color: @bg-alt;
+}
+
+textbox {
+    text-color:       @fg;
+}

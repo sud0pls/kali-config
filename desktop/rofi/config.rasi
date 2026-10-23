@@ -1,0 +1,19 @@
+/* Pen-tmux: config de rofi (Win+D). Generado por desktop/setup-xfce.sh */
+configuration {
+    modi:                 "drun,run,window,filebrowser";
+    show-icons:           true;
+    icon-theme:           "Flat-Remix-Blue-Dark";
+    terminal:             "qterminal";
+    drun-display-format:  "{name}";
+    disable-history:      false;
+    sort:                 true;
+    sorting-method:       "fzf";
+    matching:             "fuzzy";
+    display-drun:         " 󰀻  Apps ";
+    display-run:          "   Run ";
+    display-window:       "   Ventanas ";
+    display-filebrowser:  "   Archivos ";
+    kb-cancel:            "Escape,Super+d";
+}
+
+@theme "~/.config/pen-tmux/rofi/pen.rasi"
