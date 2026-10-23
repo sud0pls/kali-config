@@ -1,8 +1,4 @@
 #!/bin/sh
-# genmon: muestra la IP de tun0 (o de la primera interfaz tun) en la barra.
-# Clic en la IP -> la copia al portapapeles (CLIPBOARD + PRIMARY, llega al host).
-# Uso: vpn-ip.sh          salida XML para genmon
-#      vpn-ip.sh copy     copia la IP actual
 
 SELF="$(readlink -f "$0")"
 

@@ -1,6 +1,3 @@
-/* Tema de rofi: panel con el wallpaper a la izquierda, lista a la derecha.
-   Mismos colores que la barra de XFCE y la de tmux (#00afff = colour39). */
-
 * {
     font:             "Hack Nerd Font 11";
     bg:               #11131a;
@@ -31,7 +28,6 @@ mainbox {
     children:         [ imagebox, listbox ];
 }
 
-/* --- Izquierda: imagen + buscador ------------------------------------------ */
 imagebox {
     expand:           false;
     width:            328px;
@@ -66,7 +62,6 @@ entry {
     cursor:            text;
 }
 
-/* --- Derecha: modos + resultados ------------------------------------------- */
 listbox {
     padding:          18px;
     spacing:          14px;

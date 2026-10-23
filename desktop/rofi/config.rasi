@@ -1,4 +1,3 @@
-/* Pen-tmux: config de rofi (Win+D). Generado por desktop/setup-xfce.sh */
 configuration {
     modi:                 "drun,run,window,filebrowser";
     show-icons:           true;

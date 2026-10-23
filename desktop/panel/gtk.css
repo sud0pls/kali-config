@@ -1,6 +1,3 @@
-/* Barra de XFCE: fondo oscuro, botones tipo "pill" redondeados y acento azul
-   (#00afff = colour39, el mismo de la barra de tmux). Solo afecta al panel. */
-
 .xfce4-panel.background {
     background: rgba(17, 19, 26, 0.88);
     border-bottom: 1px solid rgba(0, 175, 255, 0.35);
@@ -23,7 +20,6 @@
     box-shadow: inset 0 -2px 0 #00afff;
 }
 
-/* Boton del menu de Kali resaltado */
 .xfce4-panel #whiskermenu-button {
     background: rgba(0, 175, 255, 0.15);
     margin: 4px 6px 4px 6px;
@@ -33,13 +29,11 @@
     background: rgba(0, 175, 255, 0.35);
 }
 
-/* Reloj */
 .xfce4-panel #clock-button label {
     color: #00afff;
     font-weight: bold;
 }
 
-/* Workspaces */
 .xfce4-panel wnck-pager {
     background-color: rgba(255, 255, 255, 0.05);
 }

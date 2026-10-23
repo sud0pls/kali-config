@@ -1,9 +1,4 @@
 #!/bin/sh
-# Pega el portapapeles (CLIPBOARD; si esta vacio, PRIMARY) en el pane indicado.
-# Uso: clip-paste.sh <pane_id>
-# - Quita los \r que trae el texto copiado en Windows (si no, actuan como Enter)
-# - Pega con bracketed paste: zsh no ejecuta las lineas al pegarlas
-# - Si el portapapeles esta vacio avisa en vez de pegar un buffer viejo de tmux
 
 [ -n "$DISPLAY" ] || export DISPLAY=:0
 pane="${1:-}"

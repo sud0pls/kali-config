@@ -16,6 +16,14 @@ if [ ! -f "$TMUX_CONF_SRC" ] || [ ! -d "$SCRIPT_DIR/zsh" ]; then
     exit 1
 fi
 
+CONFLICTS="$(grep -rlE '^(<<<<<<<|>>>>>>>) ' --exclude-dir=.git "$SCRIPT_DIR" 2>/dev/null || true)"
+if [ -n "$CONFLICTS" ]; then
+    echo "Hay conflictos de git sin resolver (marcas <<<<<<< / >>>>>>>) en:" >&2
+    printf '  %s\n' $CONFLICTS >&2
+    echo "Resolvelos (o 'git rebase --abort') antes de instalar: rompen tmux y los scripts." >&2
+    exit 1
+fi
+
 if [ "$(id -u)" -eq 0 ]; then
     SUDO=""
 else
@@ -30,7 +38,6 @@ command -v curl     >/dev/null 2>&1 || NEED_INSTALL+=("curl")
 command -v xz       >/dev/null 2>&1 || NEED_INSTALL+=("xz-utils")
 command -v fc-cache >/dev/null 2>&1 || NEED_INSTALL+=("fontconfig")
 
-# Escritorio XFCE (Kali): barra, rofi (Win+D) y wallpaper -> desktop/setup-xfce.sh
 IS_XFCE=0
 case "${XDG_CURRENT_DESKTOP:-}" in *XFCE*) IS_XFCE=1 ;; esac
 pgrep -u "$(id -u)" -x xfce4-session >/dev/null 2>&1 && IS_XFCE=1
@@ -196,8 +203,18 @@ else
     warn "  (desde el escritorio podes correr: bash $SCRIPT_DIR/desktop/setup-xfce.sh)"
 fi
 
-if command -v tmux >/dev/null 2>&1 && tmux info >/dev/null 2>&1; then
-    tmux source-file "$HOME/.tmux.conf" && log "Config de tmux recargada en la sesion activa"
+if command -v tmux >/dev/null 2>&1; then
+    CHECK_SOCK="pen-tmux-check-$$"
+    if TMUX_ERR="$(tmux -L "$CHECK_SOCK" -f /dev/null start-server \; source-file "$TMUX_CONF_SRC" 2>&1)"; then
+        log "tmux.conf valido"
+    else
+        warn "tmux.conf tiene errores, tmux no lo va a cargar completo:"
+        printf '%s\n' "$TMUX_ERR" >&2
+    fi
+    tmux -L "$CHECK_SOCK" kill-server >/dev/null 2>&1 || true
+    if tmux info >/dev/null 2>&1; then
+        tmux source-file "$HOME/.tmux.conf" && log "Config de tmux recargada en la sesion activa"
+    fi
 fi
 
 echo ""

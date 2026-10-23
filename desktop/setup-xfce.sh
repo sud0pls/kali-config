@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# Personaliza el escritorio XFCE de Kali: barra (panel), lanzadores y wallpaper.
-# Lo llama autoinstall.sh; tambien se puede correr solo. Hace backup del panel antes.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -26,7 +24,6 @@ xq()     { xfconf-query -c xfce4-panel "$@"; }
 setp()   { xq -p "$1" -n -t "$2" -s "$3"; }
 plugin() { setp "/plugins/plugin-$1" string "$2"; }
 
-# --- Backup -----------------------------------------------------------------
 BACKUP_DIR="$HOME/.local/share/xfce4-panel-profiles"
 if [ ! -f "$HOME/.config/xfce4/panel/.pen-tmux" ]; then
     mkdir -p "$BACKUP_DIR"
@@ -41,12 +38,10 @@ if [ ! -f "$HOME/.config/xfce4/panel/.pen-tmux" ]; then
     fi
 fi
 
-# --- Scripts de la barra ----------------------------------------------------
 mkdir -p "$HOME/.config/pen-tmux"
 ln -sfn "$PANEL_SRC" "$HOME/.config/pen-tmux/panel"
 chmod +x "$PANEL_SRC"/*.sh
 
-# --- Estilo (gtk.css del usuario importa el del repo) -----------------------
 GTK_CSS="$HOME/.config/gtk-3.0/gtk.css"
 mkdir -p "$(dirname "$GTK_CSS")"
 touch "$GTK_CSS"
@@ -55,9 +50,6 @@ if ! grep -qF "$MARKER" "$GTK_CSS"; then
     log "Estilo de la barra agregado a $GTK_CSS"
 fi
 
-# --- Layout -----------------------------------------------------------------
-# menu | terminal firefox burp code | workspaces | ventanas ...... VPN | cpu | tray | audio | notif | bateria | reloj | salir
-# Con el panel corriendo, los plugins reescriben su config vieja al reiniciar: se para antes
 xfce4-panel --quit >/dev/null 2>&1 || true
 for _ in 1 2 3 4 5 6 7 8 9 10; do pgrep -x xfce4-panel >/dev/null || break; sleep 0.5; done
 
@@ -82,7 +74,7 @@ setp /plugins/plugin-1/show-button-title bool   false
 plugin 2 separator
 setp /plugins/plugin-2/style uint 0
 
-launcher() {   # launcher <id> <archivo.desktop>
+launcher() {
     local id="$1" desktop="$2" dir="$HOME/.config/xfce4/panel/launcher-$1"
     [ -f "$desktop" ] || return 1
     mkdir -p "$dir"
@@ -170,13 +162,11 @@ touch "$HOME/.config/xfce4/panel/.pen-tmux"
 setsid xfce4-panel >/dev/null 2>&1 < /dev/null &
 log "Barra de XFCE configurada"
 
-# --- Wallpaper --------------------------------------------------------------
 if [ -f "$WALLPAPER_SRC" ]; then
     WP_DIR="$HOME/.local/share/backgrounds"
     mkdir -p "$WP_DIR"
     cp -f "$WALLPAPER_SRC" "$WP_DIR/pen-tmux.png"
     props="$(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep -E '/last-image$' || true)"
-    # Monitores activos aunque todavia no tengan propiedad (p.ej. Virtual-1), en cada workspace
     ws_count="$(xfconf-query -c xfwm4 -p /general/workspace_count 2>/dev/null || echo 1)"
     for mon in $(xrandr --listmonitors 2>/dev/null | awk 'NR>1 {print $NF}'); do
         for ((ws = 0; ws < ws_count; ws++)); do
@@ -190,7 +180,6 @@ if [ -f "$WALLPAPER_SRC" ]; then
     log "Wallpaper aplicado: $WP_DIR/pen-tmux.png"
 fi
 
-# --- rofi (Win+D) -----------------------------------------------------------
 ROFI_SRC="$SCRIPT_DIR/rofi"
 ln -sfn "$ROFI_SRC" "$HOME/.config/pen-tmux/rofi"
 chmod +x "$ROFI_SRC"/*.sh
@@ -202,13 +191,9 @@ if [ -e "$ROFI_CONF" ] && [ "$(readlink -f "$ROFI_CONF")" != "$(readlink -f "$RO
 fi
 ln -sfn "$ROFI_SRC/config.rasi" "$ROFI_CONF"
 
-# --- Atajos -----------------------------------------------------------------
-# xfwm4 guarda UNA tecla por accion: si una accion queda con dos teclas
-# (p.ej. Ctrl+Alt+1 y Win+1 -> workspace_1_key) gana una al azar y la otra no anda.
-# Por eso, antes de asignar, se borra todo lo que choque con la tecla o la accion.
 KS="xfconf-query -c xfce4-keyboard-shortcuts"
 
-unbind_key() {   # unbind_key "<Super>d"  -> quita esa tecla de xfwm4 y de comandos
+unbind_key() {
     local k
     for k in "/xfwm4/custom/$1" "/commands/custom/$1"; do
         $KS -p "$k" >/dev/null 2>&1 && $KS -p "$k" -r
@@ -216,7 +201,7 @@ unbind_key() {   # unbind_key "<Super>d"  -> quita esa tecla de xfwm4 y de coman
     return 0
 }
 
-wm_bind() {      # wm_bind "<Super>1" workspace_1_key
+wm_bind() {
     local key="$1" action="$2" prop
     while IFS= read -r prop; do
         [ -n "$prop" ] && [ "$prop" != "/xfwm4/custom/$key" ] && $KS -p "$prop" -r
@@ -225,23 +210,20 @@ wm_bind() {      # wm_bind "<Super>1" workspace_1_key
     $KS -p "/xfwm4/custom/$key" -n -t string -s "$action"
 }
 
-# Win+D: quitar "mostrar escritorio" de xfwm4 (queda en Ctrl+Alt+D) y abrir rofi
 unbind_key "<Super>d"
 $KS -p "/commands/custom/<Super>d" -n -t string -s "$HOME/.config/pen-tmux/rofi/launch.sh"
 log "Win+D -> rofi (mostrar escritorio queda en Ctrl+Alt+D)"
 
-# Win+1..4 -> workspace 1..4 (reemplaza Ctrl+Alt+1..4)
 for n in 1 2 3 4; do
     wm_bind "<Super>$n" "workspace_${n}_key"
 done
 log "Win+1..4 -> cambiar de workspace"
 command -v rofi >/dev/null 2>&1 || warn "rofi no esta instalado (sudo apt install rofi)"
 
-# --- Verificacion -----------------------------------------------------------
 for _ in $(seq 1 20); do pgrep -u "$(id -u)" -x xfce4-panel >/dev/null && break; sleep 0.5; done
 
 FAIL=0
-check() {   # check "<descripcion>" <comando...>
+check() {
     local desc="$1"; shift
     if "$@" >/dev/null 2>&1; then
         printf '   \033[1;32mOK\033[0m %s\n' "$desc"
